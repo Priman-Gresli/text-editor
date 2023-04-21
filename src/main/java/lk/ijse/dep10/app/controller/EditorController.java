@@ -81,6 +81,52 @@ public class EditorController {
 
     private ArrayList<Integer> arrayList = new ArrayList<>();
 
+    public void initialize() {
+
+        txtFind.textProperty().addListener((ov,previous,current)->{
+            findResults();
+
+        });
+        textEditor.textProperty().addListener((ov,previous,current)->{
+            findResults();
+            textChange();
+        });
+        txtReplace.textProperty().addListener((ov,previous,current)->{
+            findResults();
+        });
+        Platform.runLater(() ->{
+            textEditor.getScene().getWindow().setOnCloseRequest(windowEvent ->{
+                mnClose.fire();
+            });
+        });
+    }
+    private void findResults(){
+        textArea= textEditor.getText();
+        textFind= txtFind.getText();
+        count=0;
+
+        arrayList.clear();
+        if (textFind.isEmpty()){
+            lblResult.setText("0 Results");
+            textEditor.selectRange(0,0);
+            return;
+        }
+        Pattern pattern = Pattern.compile(textFind);
+        Matcher matcher = pattern.matcher(textArea);
+        if (flag) {
+            pattern = Pattern.compile(textFind.toLowerCase());
+            matcher = pattern.matcher(textArea.toLowerCase());
+        }
+        while (matcher.find()){
+            count++;
+            arrayList.add(matcher.start());
+            arrayList.add(matcher.end());
+        }
+        if (arrayList.isEmpty()) return;
+        textEditor.selectRange(arrayList.get(0), arrayList.get(1));
+        upCount=0;
+        lblResult.setText((upCount/2+1)+"/"+count+" Results");
+    }
     @FXML
     void btnDownOnAction(ActionEvent event) {
 
@@ -193,23 +239,67 @@ public class EditorController {
     }
 
     @FXML
-    void mnSaveAsOnAction(ActionEvent event) {
+    void mnSaveOnAction(ActionEvent event) throws IOException {
+        if (file==null){
+            mnSaveAsOnAction(event);
+        }else {
+            saveFile();
+        }
+        if (file!=null) {
+            saveKey=true;
+            mnSave.setDisable(saveKey);
+        }
+    }
+    @FXML
+    public void mnSaveAsOnAction(ActionEvent actionEvent) throws IOException {
+        Stage stage = (Stage) textEditor.getScene().getWindow();
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Save As a text file");
+        file = fileChooser.showSaveDialog(textEditor.getScene().getWindow());
+        if (file==null) return;
+        FileOutputStream fos = new FileOutputStream(file);
+        String text = textEditor.getText();
+        byte[] bytes= text.getBytes();
+        fos.write(bytes);
+        fos.close();
+        textEditor.setText(new String(bytes));
+        String [] array =file.getPath().split("/");
+        stage.setTitle(array[array.length-1]);
 
     }
-
-    @FXML
-    void mnSaveOnAction(ActionEvent event) {
-
+    void saveFile() throws IOException {
+        FileOutputStream fos = new FileOutputStream(file);
+        String text = textEditor.getText();
+        byte[] bytes= text.getBytes();
+        fos.write(bytes);
+        fos.close();
+        textEditor.setText(new String(bytes));
+        Stage stage = (Stage) textEditor.getScene().getWindow();
+        stage.setTitle(stage.getTitle().substring(1,stage.getTitle().length()));
     }
-
     @FXML
-    void rootOnDragDropped(DragEvent event) {
-
+    public void rootOnDragOver(DragEvent dragEvent) {
+        dragEvent.acceptTransferModes(TransferMode.ANY);
     }
-
     @FXML
-    void rootOnDragOver(DragEvent event) {
-
+    public void rootOnDragDropped(DragEvent dragEvent) throws IOException {
+        File droppedFile = dragEvent.getDragboard().getFiles().get(0);
+        FileInputStream fis = new FileInputStream(droppedFile);
+        byte[] bytes =fis.readAllBytes();
+        fis.close();
+        textEditor.setText(new String(bytes));
+        Stage stage = (Stage) textEditor.getScene().getWindow();
+        stage.setTitle(droppedFile.getName());
+        System.out.println( droppedFile.getName());
+    }
+    @FXML
+    public void textChange(){
+        Stage stage = (Stage) textEditor.getScene().getWindow();
+        if (!stage.getTitle().contains("*")) stage.setTitle("*"+ stage.getTitle());
+        saveKey=false;
+        mnSave.setDisable(saveKey);
+        if (!stage.getTitle().contains("*")) stage.setTitle("*"+ stage.getTitle());
+        mnSave.setDisable(saveKey);
     }
 
 }
