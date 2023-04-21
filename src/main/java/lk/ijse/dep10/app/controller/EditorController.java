@@ -1,7 +1,6 @@
 package lk.ijse.dep10.app.controller;
 
 import javafx.application.Platform;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.event.ActionEvent;;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -128,31 +127,6 @@ public class EditorController {
         lblResult.setText((upCount/2+1)+"/"+count+" Results");
     }
     @FXML
-    void btnDownOnAction(ActionEvent event) {
-
-    }
-
-    @FXML
-    void btnReplaceAllOnAction(ActionEvent event) {
-
-    }
-
-    @FXML
-    void btnReplaceOnAction(ActionEvent event) {
-
-    }
-
-    @FXML
-    void btnUPOnAction(ActionEvent event) {
-
-    }
-
-    @FXML
-    void chkMatchOnAction(ActionEvent event) {
-
-    }
-
-    @FXML
     void mnAboutOnAction(ActionEvent event) throws IOException {
         Stage stageAbout = new Stage();
         stageAbout.initModality(Modality.WINDOW_MODAL);
@@ -232,12 +206,8 @@ public class EditorController {
         textEditor.setText(new String(bytes));
 
     }
-
     @FXML
-    void mnPrintOnAction(ActionEvent event) {
-
-    }
-
+    void mnPrintOnAction(ActionEvent event) {}
     @FXML
     void mnSaveOnAction(ActionEvent event) throws IOException {
         if (file==null){
@@ -250,7 +220,6 @@ public class EditorController {
             mnSave.setDisable(saveKey);
         }
     }
-    @FXML
     public void mnSaveAsOnAction(ActionEvent actionEvent) throws IOException {
         Stage stage = (Stage) textEditor.getScene().getWindow();
         FileChooser fileChooser = new FileChooser();
@@ -277,11 +246,9 @@ public class EditorController {
         Stage stage = (Stage) textEditor.getScene().getWindow();
         stage.setTitle(stage.getTitle().substring(1,stage.getTitle().length()));
     }
-    @FXML
     public void rootOnDragOver(DragEvent dragEvent) {
         dragEvent.acceptTransferModes(TransferMode.ANY);
     }
-    @FXML
     public void rootOnDragDropped(DragEvent dragEvent) throws IOException {
         File droppedFile = dragEvent.getDragboard().getFiles().get(0);
         FileInputStream fis = new FileInputStream(droppedFile);
@@ -292,7 +259,6 @@ public class EditorController {
         stage.setTitle(droppedFile.getName());
         System.out.println( droppedFile.getName());
     }
-    @FXML
     public void textChange(){
         Stage stage = (Stage) textEditor.getScene().getWindow();
         if (!stage.getTitle().contains("*")) stage.setTitle("*"+ stage.getTitle());
@@ -301,5 +267,58 @@ public class EditorController {
         if (!stage.getTitle().contains("*")) stage.setTitle("*"+ stage.getTitle());
         mnSave.setDisable(saveKey);
     }
+    @FXML
+    void btnReplaceAllOnAction(ActionEvent event) {
+        if (txtReplace.getText().isEmpty()) return;
+        textReplaceAll = txtReplace.getText();
+        System.out.println(flag);
+        if (flag) {
+            textEditor.setText(textEditor.getText().replaceAll("(?i)"+textFind, textReplaceAll));
+        }else textEditor.setText(textEditor.getText().replaceAll(textFind, textReplaceAll));
+        lblResult.setText("Results");
+        txtReplace.clear();
+        findResults();
+    }
+    @FXML
+    void btnReplaceOnAction(ActionEvent event) {
+        if (txtReplace.getText().isEmpty()) return;
+        textReplace = txtReplace.getText();
+        String s ;
+        if (flag) {
+            s = textEditor.getText().substring(0, arrayList.get(upCount))
+                    + textReplace + textEditor.getText().substring(arrayList.get(upCount + 1), textEditor.getLength());
+        }else {
+            s = textEditor.getText().substring(0, arrayList.get(upCount))
+                    + textReplace + textEditor.getText().substring(arrayList.get(upCount + 1), textEditor.getLength());
+        }
+        textEditor.setText(s);
+        upCount = 0;
+        txtReplace.clear();
+        findResults();
+
+    }
+    @FXML
+    void btnDownOnAction(ActionEvent event) {
+        if (count==0) return;
+        if (upCount >= (count * 2) - 2) upCount = 0;
+        else upCount += 2;
+        textEditor.selectRange(arrayList.get(upCount), arrayList.get(upCount + 1));
+        lblResult.setText((upCount / 2 + 1) + "/" + count + " Results");
+    }
+    @FXML
+    public void btnUPOnAction(ActionEvent actionEvent) {
+        if (count==0) return;
+        System.out.println(count);
+        if (upCount == 0) upCount = count * 2 - 2;
+        else upCount -= 2;
+        textEditor.selectRange(arrayList.get(upCount), arrayList.get(upCount + 1));
+        lblResult.setText((upCount / 2 + 1) + "/" + count + " Results");
+    }
+    @FXML
+    void chkMatchOnAction(ActionEvent event) {
+        flag= !chkMatch.isSelected();
+        findResults();
+    }
+
 
 }
