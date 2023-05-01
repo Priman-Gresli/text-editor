@@ -9,10 +9,18 @@ This text editor can,
 + Replace words
 
 To set up this application follow these steps.
-+ Clone the project -https://github.com/Priman-Gresli/text-editor.git
-+ Do a maven clean -mvn clean
-+ Run the AppInitializerWrapper class
-
+1. Clone the project 
+```
+git clone https://github.com/Priman-Gresli/text-editor.git
+```
+2. Build the project from the parent folder -
+```
+mvn clean install
+```
+3. Run the AppInitializerWrapper class
+```
+java AppInitializerWrapper
+```
 
 This is my Project UI  
 
